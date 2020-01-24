@@ -10,8 +10,8 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
-# map_file = "maps/test_cross.txt"
+# map_file = "maps/test_line.txt"
+map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
@@ -41,6 +41,7 @@ current_room_exits = player.current_room.get_exits()
 
 def player_travel_direction(direction):
     pass
+
 # create basic dictionary for each room when visited
 
 
@@ -50,10 +51,29 @@ def room_vertex():
         room[exit] = '?'
         map_graph[current_room_id] = room
 
+# Algorithm to find random exit that hasn't been explored yet
+
 
 room_vertex()
 
 print(map_graph)
+
+
+def room_unexplored_exit():
+    # Track the unexplored exits
+    unexplored = []
+    # find the exits in a current room
+    for exit in current_room_exits:
+        # Check whether given exits is has '?" for being unexplored
+        if map_graph[current_room_id][exit] == '?':
+            unexplored.append(exit)
+
+    # Randomize the choice from unexplored exits and return it
+    return random.choice(unexplored)
+
+
+print('Random choice of exit')
+print(room_unexplored_exit())
 # Loop through map and build a graph:
 while len(map_graph) < len(room_graph):
     break
