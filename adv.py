@@ -31,12 +31,6 @@ traversal_path = []
 # Store entire map as graph dictionary
 map_graph = {}
 
-# State returns current room exits, we need to iterate through to create the grap and the perform dft or bft
-
-# Pointers to commands:
-current_room_id = player.current_room.id
-current_room_exits = player.current_room.get_exits()
-
 
 def player_travel_direction(direction):
     return player.travel(direction)
@@ -45,9 +39,9 @@ def player_travel_direction(direction):
 # create basic dictionary for each room when visited
 def current_room_vertex():
     room = {}
-    for exit in current_room_exits:
+    for exit in player.current_room.get_exits():
         room[exit] = "?"
-        map_graph[current_room_id] = room
+        map_graph[player.current_room.id] = room
 
 
 # Algorithm to find random exit that hasn't been explored yet
@@ -55,9 +49,9 @@ def current_room_unexplored_exit():
     # Track the unexplored exits
     unexplored = []
     # find the exits in a current room
-    for exit in current_room_exits:
+    for exit in player.current_room.get_exits():
         # Check whether given exits is has '?" for being unexplored
-        if map_graph[current_room_id][exit] == "?":
+        if map_graph[player.current_room.id][exit] == "?":
             unexplored.append(exit)
 
     # Randomize the choice from unexplored exits and return as a string
@@ -69,15 +63,23 @@ current_room_vertex()
 print(f"Map Started {map_graph}")
 # Loop through map and build a graph, check against given size from room_graph
 while len(map_graph) < len(room_graph):
-    break  # Break the loop for testing purposes
     '''
     We have two possibilities, we need to go down the path of rooms which have ?
     And we need to go back via BFS to find next unexplored room, while doing so we find out room id and attach it 
     '''
     # Player object contains move commands linking to Room object and current room is stored in player
     # Check inside of map_graph for current room, find where given room still have '?' exits remaining
-    if list(map_graph[current_room_id].values()).count('?') != 0:
+    # list of values is returned and if count is zero, then that room has no more unexplored exits, time to back track via BFS
+    if list(map_graph[player.current_room.id].values()).count('?') != 0:
         # do traversal in random direction
+        random_exit = current_room_unexplored_exit()
+        # move in that direction to the other room
+        player_travel_direction(random_exit)
+        print(player.current_room.id)
+        # Check the room moved into is part of created map_graph, otherwise create a new vertex/room
+
+        # Store the v
+        break  # Break the loop for testing purposes
         pass
     else:
         # Do BFT to find nearest room with '?'
