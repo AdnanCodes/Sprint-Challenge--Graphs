@@ -1,9 +1,8 @@
-from room import Room
-from player import Player
-from world import World
-
 import random
 from ast import literal_eval
+from player import Player
+from room import Room
+from world import World
 
 # Load world
 world = World()
@@ -21,13 +20,13 @@ room_graph = literal_eval(open(map_file, "r").read())
 world.load_graph(room_graph)
 
 # Print an ASCII map
-# world.print_rooms()
+world.print_rooms()
 
 player = Player(world.starting_room)
 
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
-traversal_path = ['n', 'n']
+traversal_path = []
 
 # Store entire map as graph dictionary
 map_graph = {}
@@ -40,48 +39,50 @@ current_room_exits = player.current_room.get_exits()
 
 
 def player_travel_direction(direction):
-    pass
+    return player.travel(direction)
+
 
 # create basic dictionary for each room when visited
-
-
-def room_vertex():
+def current_room_vertex():
     room = {}
     for exit in current_room_exits:
-        room[exit] = '?'
+        room[exit] = "?"
         map_graph[current_room_id] = room
 
+
 # Algorithm to find random exit that hasn't been explored yet
-
-
-room_vertex()
-
-print(map_graph)
-
-
-def room_unexplored_exit():
+def current_room_unexplored_exit():
     # Track the unexplored exits
     unexplored = []
     # find the exits in a current room
     for exit in current_room_exits:
         # Check whether given exits is has '?" for being unexplored
-        if map_graph[current_room_id][exit] == '?':
+        if map_graph[current_room_id][exit] == "?":
             unexplored.append(exit)
 
-    # Randomize the choice from unexplored exits and return it
+    # Randomize the choice from unexplored exits and return as a string
     return random.choice(unexplored)
 
 
-print('Random choice of exit')
-print(room_unexplored_exit())
-# Loop through map and build a graph:
+# Initialize the map graph building at first location
+current_room_vertex()
+print(f"Map Started {map_graph}")
+# Loop through map and build a graph, check against given size from room_graph
 while len(map_graph) < len(room_graph):
-    break
-# For simple Line map, it is simple n,n but the computer wouldn't know that
-
-# We need set up our own
-# { 0: {'n': '?', 's': '?', 'w': '?', 'e': '?'} }
-
+    break  # Break the loop for testing purposes
+    '''
+    We have two possibilities, we need to go down the path of rooms which have ?
+    And we need to go back via BFS to find next unexplored room, while doing so we find out room id and attach it 
+    '''
+    # Player object contains move commands linking to Room object and current room is stored in player
+    # Check inside of map_graph for current room, find where given room still have '?' exits remaining
+    if map_graph[current_room_id].values().count('?') != 0:
+        # do traversal in random direction
+        pass
+    else:
+        # Do BFT to find nearest room with '?'
+        # Room Path inside of BFT should hold room_id, this can be used to create the edges between rooms. Thus completing the graph.
+        pass
 
 # TRAVERSAL TEST
 # visited_rooms = set()
