@@ -67,7 +67,6 @@ def current_room_unexplored_exit():
 # Initialize the map graph building at first location
 current_room_vertex()
 print(f"Map Started {map_graph}")
-
 # Loop through map and build a graph, check against given size from room_graph
 while len(map_graph) < len(room_graph):
     break  # Break the loop for testing purposes
