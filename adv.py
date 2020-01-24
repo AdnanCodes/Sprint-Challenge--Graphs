@@ -3,6 +3,7 @@ from ast import literal_eval
 from player import Player
 from room import Room
 from world import World
+from queue import Queue
 
 # Load world
 world = World()
@@ -10,10 +11,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -57,6 +58,29 @@ def current_room_unexplored_exit():
     # Randomize the choice from unexplored exits and return as a string
     return random.choice(unexplored)
 
+# BFT function to find nearest '?' unexplored exit
+# Returns a list of room ids needed to get to first room with unexplored exits
+
+
+def find_nearest_unexplored_exit(room_id):
+    visited = set()
+    q = Queue()
+    q.enqueue([room_id])
+
+    while q.size() > 0:
+        path = q.dequeue()
+        current_room = path[-1]
+        # Check first after dequeue whether this room has unexplored exits, return path immediately
+        if list(map_graph[current_room].values()).count('?') != 0:
+            return path
+        if current_room not in visited:
+            visited.add(current_room)
+            # After current room added to visted, we need queue up rooms that needs to check for unexplored exits
+            for new_room in map_graph[current_room].values():
+                new_path = path.copy()
+                new_path.append(new_room)
+                q.enqueue(new_path)
+
 
 # Initialize the map graph building at first location
 current_room_vertex()
@@ -64,7 +88,7 @@ current_room_vertex()
 while len(map_graph) < len(room_graph):
     '''
     We have two possibilities, we need to go down the path of rooms which have ?
-    And we need to go back via BFS to find next unexplored room, while doing so we find out room id and attach it 
+    And we need to go back via BFS to find next unexplored room, while doing so we find out room id and attach it
     '''
     # Player object contains move commands linking to Room object and current room is stored in player
     # Check inside of map_graph for current room, find where given room still have '?' exits remaining
@@ -87,28 +111,40 @@ while len(map_graph) < len(room_graph):
         flipped_direction = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e', }
         map_graph[player.current_room.id][flipped_direction[random_exit]
                                           ] = room_id_before_move
-        break  # Break the loop for testing purposes
     else:
         # Do BFT to find nearest room with '?'
         # Room Path inside of BFT should hold room_id, this can be used to create the edges between rooms. Thus completing the graph.
-        pass
+        backward_path = find_nearest_unexplored_exit(player.current_room.id)
+        # Use backward_path to move the player back
+        # Path needs to be converted to traversal_path directions
+        for each_room_id in backward_path:
+            # For each of the directions in a room
+            for each_direction in map_graph[player.current_room.id]:
+                # Match which room id matches
+                if map_graph[player.current_room.id][each_direction] == each_room_id:
+                    # move the player and add to traversal_path
+                    player.travel(each_direction)
+                    traversal_path.append(each_direction)
+                    # Break out the inner loop as it just moved the player
+                    break
+                # Check for next room location
 
 # TRAVERSAL TEST
-# visited_rooms = set()
-# player.current_room = world.starting_room
-# visited_rooms.add(player.current_room)
+visited_rooms = set()
+player.current_room = world.starting_room
+visited_rooms.add(player.current_room)
 
 
-# for move in traversal_path:
-#     player.travel(move)
-#     visited_rooms.add(player.current_room)
+for move in traversal_path:
+    player.travel(move)
+    visited_rooms.add(player.current_room)
 
-# if len(visited_rooms) == len(room_graph):
-#     print(
-#         f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
-# else:
-#     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
-#     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
+if len(visited_rooms) == len(room_graph):
+    print(
+        f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
+else:
+    print("TESTS FAILED: INCOMPLETE TRAVERSAL")
+    print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
 
 
 #######
