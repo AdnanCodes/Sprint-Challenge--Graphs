@@ -60,7 +60,6 @@ def current_room_unexplored_exit():
 
 # Initialize the map graph building at first location
 current_room_vertex()
-print(f"Map Started {map_graph}")
 # Loop through map and build a graph, check against given size from room_graph
 while len(map_graph) < len(room_graph):
     '''
@@ -71,16 +70,24 @@ while len(map_graph) < len(room_graph):
     # Check inside of map_graph for current room, find where given room still have '?' exits remaining
     # list of values is returned and if count is zero, then that room has no more unexplored exits, time to back track via BFS
     if list(map_graph[player.current_room.id].values()).count('?') != 0:
+        # Track room numbers, so it can be assigned
+        room_id_before_move = player.current_room.id
         # do traversal in random direction
         random_exit = current_room_unexplored_exit()
         # move in that direction to the other room
         player_travel_direction(random_exit)
-        print(player.current_room.id)
+        # Add to Traversal-Path
+        traversal_path.append(random_exit)
         # Check the room moved into is part of created map_graph, otherwise create a new vertex/room
-
-        # Store the v
+        if player.current_room.id not in map_graph:
+            current_room_vertex()
+        # Assign room number to previous room exits
+        map_graph[room_id_before_move][random_exit] = player.current_room.id
+        # Assign previous room id to current room but direction needs to be flipped
+        flipped_direction = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e', }
+        map_graph[player.current_room.id][flipped_direction[random_exit]
+                                          ] = room_id_before_move
         break  # Break the loop for testing purposes
-        pass
     else:
         # Do BFT to find nearest room with '?'
         # Room Path inside of BFT should hold room_id, this can be used to create the edges between rooms. Thus completing the graph.
